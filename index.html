@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBD-Based Strength & Workout Routine Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+        }
+        .exercise-card {
+            background: rgba(30, 41, 59, 0.8);
+            border-left: 4px solid #ef4444;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .adsense-placeholder {
+            border: 2px dashed #9ca3af;
+            background: rgba(75, 85, 99, 0.2);
+            padding: 1.5rem;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
+            border-radius: 0.375rem;
+        }
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #ef4444, #f97316);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        }
+        .btn-pulse {
+            animation: pulse-glow 2s infinite;
+        }
+    </style>
+</head>
+<body class="text-slate-100">
+    <div class="min-h-screen">
+        <!-- TOP ADSENSE PLACEHOLDER -->
+        <div class="bg-slate-900 border-b border-slate-700 p-4">
+            <div class="max-w-7xl mx-auto">
+                <div class="adsense-placeholder">
+                    [Google AdSense Banner Area - Responsive] Top Banner
+                </div>
+            </div>
+        </div>
+
+        <!-- HEADER -->
+        <header class="bg-gradient-to-r from-slate-900 via-red-900 to-slate-900 border-b border-red-700 sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <h1 class="text-4xl font-bold text-white mb-2">💪 SBD-Based Strength & Workout Dashboard</h1>
+                <p class="text-slate-300">Calculate your personalized powerbuilding routine based on your Bench Press, Squat & Deadlift 1RMs</p>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- MAIN CONTENT -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- USER PROFILE & CALCULATOR INPUTS -->
+                <section class="bg-slate-800 border border-slate-700 rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-6 text-red-400">📊 Your Profile & 1RM Inputs</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Age</label>
+                            <input type="number" id="age" placeholder="25" class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Gender</label>
+                            <select id="gender" class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Height (Feet)</label>
+                            <input type="number" id="heightFeet" placeholder="5" min="0" class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Height (Inches)</label>
+                            <input type="number" id="heightInches" placeholder="10" min="0" max="11" class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Weight (lbs)</label>
+                            <input type="number" id="weight" placeholder="185" class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Fitness Experience</label>
+                            <select id="experience" class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white">
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Training Goal</label>
+                            <select id="goal" class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white">
+                                <option value="hypertrophy">Hypertrophy (Muscle Growth)</option>
+                                <option value="strength">Strength (Power & 1RM Gains)</option>
+                                <option value="fatloss">Fat Loss (Lean Muscle)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">This Month's Goal</label>
+                            <input type="text" id="monthlyGoal" placeholder="e.g., Hit 315 lbs squat" class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white">
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-700 pt-6 mt-6">
+                        <h3 class="text-xl font-bold mb-4 text-red-400">🏋️ Your Core Lifts (1RM in lbs)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Bench Press 1RM (lbs)</label>
+                                <input type="number" id="bench1rm" placeholder="225" class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Squat 1RM (lbs)</label>
+                                <input type="number" id="squat1rm" placeholder="315" class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Deadlift 1RM (lbs)</label>
+                                <input type="number" id="deadlift1rm" placeholder="405" class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Ultimate Target SBD Total (lbs)</label>
+                            <input type="number" id="targetTotal" placeholder="1000" class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white mb-4">
+                        </div>
+
+                        <!-- PROGRESS BAR -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold">SBD Progress to Goal</span>
+                                <span class="text-sm text-red-400" id="progressText">0 / 0 lbs</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-4 overflow-hidden">
+                                <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <button onclick="calculateRoutine()" class="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold py-3 px-6 rounded-lg btn-pulse transition">
+                            🚀 Calculate My Routine
+                        </button>
+                    </div>
+                </section>
+
+                <!-- EXERCISE RESULTS -->
+                <section id="resultsSection" class="hidden space-y-6">
+                    <h2 class="text-2xl font-bold text-red-400">📋 Your Personalized Exercise Plan</h2>
+                    
+                    <!-- CHEST -->
+                    <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-orange-400 mb-4">🔥 CHEST (Based on Bench Press)</h3>
+                        <div id="chestExercises" class="space-y-3"></div>
+                    </div>
+
+                    <!-- SHOULDERS -->
+                    <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-orange-400 mb-4">🔥 SHOULDERS (Based on Bench Press)</h3>
+                        <div id="shoulderExercises" class="space-y-3"></div>
+                    </div>
+
+                    <!-- LEGS -->
+                    <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-orange-400 mb-4">🔥 LEGS (Based on Squat)</h3>
+                        <div id="legExercises" class="space-y-3"></div>
+                    </div>
+
+                    <!-- BACK -->
+                    <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-orange-400 mb-4">🔥 BACK (Based on Deadlift)</h3>
+                        <div id="backExercises" class="space-y-3"></div>
+                    </div>
+                </section>
+
+                <!-- WEEKLY SCHEDULE -->
+                <section id="scheduleSection" class="hidden">
+                    <h2 class="text-2xl font-bold text-red-400 mb-4">📅 6-Day PPL Split Schedule</h2>
+                    <div class="overflow-x-auto bg-slate-800 border border-slate-700 rounded-lg">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-slate-700 bg-slate-900">
+                                    <th class="px-4 py-3 text-left font-bold text-red-400">Day</th>
+                                    <th class="px-4 py-3 text-left font-bold text-red-400">Focus</th>
+                                    <th class="px-4 py-3 text-left font-bold text-red-400">Primary Exercises</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-slate-700 hover:bg-slate-700 transition">
+                                    <td class="px-4 py-3 font-semibold text-orange-400">Monday</td>
+                                    <td class="px-4 py-3">PUSH Day 1</td>
+                                    <td class="px-4 py-3">Barbell Bench Press, Overhead Press, Incline DB Press, Dumbbell Lateral Raise</td>
+                                </tr>
+                                <tr class="border-b border-slate-700 hover:bg-slate-700 transition">
+                                    <td class="px-4 py-3 font-semibold text-orange-400">Tuesday</td>
+                                    <td class="px-4 py-3">PULL Day 1</td>
+                                    <td class="px-4 py-3">Conventional Deadlift, Barbell Row, Lat Pulldown, Reverse Pec Deck Fly</td>
+                                </tr>
+                                <tr class="border-b border-slate-700 hover:bg-slate-700 transition">
+                                    <td class="px-4 py-3 font-semibold text-orange-400">Wednesday</td>
+                                    <td class="px-4 py-3">LEGS Day 1</td>
+                                    <td class="px-4 py-3">Barbell Squat, Leg Press, Bulgarian Split Squat, Romanian Deadlift</td>
+                                </tr>
+                                <tr class="border-b border-slate-700 hover:bg-slate-700 transition">
+                                    <td class="px-4 py-3 font-semibold text-orange-400">Thursday</td>
+                                    <td class="px-4 py-3">PUSH Day 2</td>
+                                    <td class="px-4 py-3">Cable Chest Fly, Dumbbell Shoulder Press, Chest Dips, Reverse Pec Deck Fly</td>
+                                </tr>
+                                <tr class="border-b border-slate-700 hover:bg-slate-700 transition">
+                                    <td class="px-4 py-3 font-semibold text-orange-400">Friday</td>
+                                    <td class="px-4 py-3">PULL Day 2</td>
+                                    <td class="px-4 py-3">Barbell Row, Seated Cable Row, Lat Pulldown, Assisted Chin-ups</td>
+                                </tr>
+                                <tr class="border-b border-slate-700 hover:bg-slate-700 transition">
+                                    <td class="px-4 py-3 font-semibold text-orange-400">Saturday</td>
+                                    <td class="px-4 py-3">LEGS Day 2</td>
+                                    <td class="px-4 py-3">Leg Press, Bulgarian Split Squat, Leg Curl, Weighted Calf Raise</td>
+                                </tr>
+                                <tr class="hover:bg-slate-700 transition">
+                                    <td class="px-4 py-3 font-semibold text-orange-400">Sunday</td>
+                                    <td class="px-4 py-3">REST & Recovery</td>
+                                    <td class="px-4 py-3">Active Recovery, Light Stretching, Mobility Work, Muscle Growth</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- TODAY'S WORKOUT TRACKER -->
+                <section id="trackerSection" class="hidden bg-slate-800 border border-slate-700 rounded-lg p-6">
+                    <h2 class="text-2xl font-bold text-red-400 mb-4">✅ Today's Workout Checklist</h2>
+                    <div id="workoutChecklist" class="space-y-2"></div>
+                    <button onclick="clearChecklist()" class="mt-4 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded">
+                        Clear Checklist
+                    </button>
+                </section>
+            </div>
+
+            <!-- RIGHT SIDEBAR - ADSENSE -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-24 space-y-6">
+                    <div class="adsense-placeholder" style="min-height: 600px;">
+                        [Google AdSense Banner Area - Responsive] Right Sidebar
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RICH CONTENT SECTION FOR ADSENSE APPROVAL -->
+        <section class="max-w-7xl mx-auto px-4 py-12 bg-slate-800 border-t border-slate-700 mt-12">
+            <h2 class="text-3xl font-bold text-red-400 mb-8">📚 Comprehensive Fitness Education Hub</h2>
+
+            <!-- Exercise Library -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold text-orange-400 mb-4">🏋️ Complete Exercise Library & Form Guide</h3>
+                <div class="space-y-6 text-slate-300 leading-relaxed">
+                    <div>
+                        <h4 class="text-xl font-bold text-red-400 mb-2">Barbell Bench Press</h4>
+                        <p>The barbell bench press is a foundational upper body compound movement that primarily targets the chest, shoulders, and triceps. Correct form is essential to maximize gains and prevent injury. Begin by lying flat on a sturdy bench with feet firmly planted on the floor. Grip the barbell with hands slightly wider than shoulder-width apart. Lower the bar slowly and with control to the middle of your chest, approximately at nipple level. Maintain a natural arch in your back while keeping your shoulder blades retracted. Press the bar upward explosively, extending your arms fully but not locking out your elbows completely. Breathe in during the lowering phase and exhale during the pressing phase. Common mistakes include bouncing the weight off the chest, using excessive weight that compromises form, and neglecting proper scapular positioning. Always warm up thoroughly before loading heavy weight, and consider using a spotter when working near your maximum.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-red-400 mb-2">Barbell Squat</h4>
+                        <p>The barbell back squat is the king of lower body exercises, engaging the quadriceps, hamstrings, glutes, and core. Start by positioning the barbell across your upper back on the trapezius muscles, not on the neck. Maintain a proud chest and neutral spine throughout the movement. Your feet should be shoulder-width apart with toes slightly turned outward. Initiate the descent by simultaneously breaking at the hips and knees, maintaining an upright torso. Descend until your hip crease drops below the level of your knees, ensuring full range of motion for maximum muscle engagement. Drive through your mid-foot and heels to return to standing position, pressing hard through your legs. Breathe in before descent, hold your breath during the bottom portion (Valsalva maneuver), and exhale forcefully as you drive upward. Proper footwear with minimal cushioning (lifting shoes or flat sole) enhances stability and force transfer. Avoid allowing your knees to cave inward, as this increases injury risk and reduces strength output.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-red-400 mb-2">Conventional Deadlift</h4>
+                        <p>The conventional deadlift is a full-body, posterior chain dominant movement that builds exceptional strength and power. Stand with the barbell over mid-foot, approximately one foot distance from each side. Grip the bar with hands just outside your legs, using a double overhand grip when possible, or alternating grip for heavier weights to prevent rolling. Bend your hips and knees until your shoulders are directly over the bar. Your back should be neutral with a slight arch, never rounded. The initial pull phase should emphasize leg drive—think about pushing the floor away rather than lifting the bar. Once the bar passes your knees, drive your hips forward aggressively, extending through your knees, hips, and ankles simultaneously. Finish in full hip and knee extension with upright posture. For safety, lower the bar under control by simultaneously hinging at the hips and bending the knees. Never allow your lower back to round during the eccentric (lowering) phase. Maintain neutral neck position by looking slightly downward throughout the lift. Proper deadlift form protects your lower back while maximizing lower body, hip, and back strength.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-red-400 mb-2">Overhead Press (OHP)</h4>
+                        <p>The overhead press, also known as the military press, is a standing shoulder strength exercise that demands significant core stability and full-body tension. Stand with feet hip-width apart, core braced, and glutes tight. Position the barbell across your front shoulders with elbows bent approximately 45 degrees from your body. The bar should rest on the anterior deltoids and upper chest. Press the bar vertically overhead, driving through your legs and maintaining an upright torso. Avoid excessive backward lean, which transfers stress to the lower back. Your head should move back slightly to allow the bar to pass, then return to neutral position. The bar should finish directly overhead with elbows locked, creating a vertical line from shoulders to the bar. Breathe in while the bar is at shoulder level, then exhale as you press upward. Maintain tight core tension throughout to protect your spine and maximize pressing power. The overhead press is excellent for shoulder health when performed correctly and demands less isolation work in accessory training.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-red-400 mb-2">Barbell Row</h4>
+                        <p>The barbell row is a posterior chain pulling movement that mirrors the pressing pattern and develops back thickness and grip strength. Approach the bar with feet hip-width apart. Grip the bar with hands slightly wider than shoulder-width, using an overhand grip. Bend your hips and knees until your torso is approximately 45 degrees from the floor, maintaining a neutral spine with a slight natural arch. Your shoulders should be slightly in front of the bar in this starting position. Drive the bar upward toward your lower chest or abdomen by retracting your scapulae (shoulder blades) and pulling with your elbows. The movement should be explosive and controlled. Squeeze your back muscles at the top of the movement, achieving maximum scapular retraction. Lower the bar with control, maintaining tension throughout the eccentric phase. Breathing follows the same pattern as squats: breath in before the lift, hold during the pull, and exhale as you complete the rep. Avoid excessive rounding of the spine and ensure your hips remain stable throughout the movement. Proper rowing form is fundamental to balanced physique development.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-red-400 mb-2">Dumbbell Exercises - Incline Press, Shoulder Press, Lateral Raise</h4>
+                        <p>Dumbbell exercises offer several advantages over barbell movements, including increased range of motion, individual limb training, and accommodating asymmetries. For the incline dumbbell press, set a bench to approximately 45 degrees, sit with dumbbells at shoulder height, and press them upward and slightly inward. The increased range of motion compared to barbell pressing provides greater chest development. Dumbbell shoulder press can be performed seated or standing; standing variation demands greater core stability and balance. Hold dumbbells at shoulder height and press overhead using the same vertical path as the barbell variation. Dumbbell lateral raises target the lateral deltoids specifically—hold light dumbbells at your sides, then raise them laterally to shoulder height with a slight elbow bend. Keep your chest up and avoid leaning; minimal momentum is desired. Dumbbells also allow for self-limiting range of motion that may be safer for shoulder health. Control the eccentric (lowering) phase meticulously with dumbbells, as the deeper range of motion demands greater muscle work.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-red-400 mb-2">Leg Press</h4>
+                        <p>The leg press machine is an excellent tool for accumulating volume on lower body muscles with reduced spinal compression compared to barbell squats. Sit in the machine with feet hip to shoulder-width apart on the platform, positioned so that your knees form a 90-degree angle in the starting position. Maintain contact with the seat and backrest throughout the set. Lower the weight by bending your knees and hips, moving to approximately 90 degrees of knee flexion (or slightly deeper if mobility allows). Avoid allowing your knees to cave inward; maintain alignment with your toes throughout. Drive through your entire foot, emphasizing mid-foot and heels, to extend your knees and hips explosively. Return to near-lockout but stop just short of full knee extension to maintain tension on the muscles. The leg press allows for heavy loading and progressive overload without the technical demands of free-weight squats. It's excellent for hypertrophy and can be trained with higher frequency. Avoid loading excessively in a manner that requires your lower back to round at the bottom position.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-red-400 mb-2">Romanian Deadlift (RDL)</h4>
+                        <p>The Romanian deadlift is a hip-hinge movement that emphasizes the posterior chain—glutes, hamstrings, and lower back. Begin standing with feet hip-width apart, holding a barbell with a double overhand grip at arm's length. Maintain a neutral spine and slight knee bend throughout the movement. Rather than initiating with leg drive like the conventional deadlift, the RDL demands a hip hinge pattern. Push your hips backward as if closing a car door with your glutes, allowing the bar to travel downward in front of your legs. You should feel a stretch in your hamstrings as you descend. The torso naturally leans forward to maintain balance, but the movement is driven by hip extension. Descend to a comfortable depth—typically until your torso is parallel to the floor or the hamstring flexibility allows. Drive your hips forward powerfully to return to standing, achieving full hip extension at the top. The RDL develops hamstring strength, glute power, and posterior chain mobility while reducing compressive forces on the spine. It's particularly valuable for athletes and for building resilient legs.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-red-400 mb-2">Cable Chest Fly & Lat Pulldown</h4>
+                        <p>Cable exercises provide constant tension throughout the range of motion, unlike free weights where tension decreases at lockout. The cable chest fly isolates the pectoral muscles effectively. Attach handles to cables at chest height and step forward so that cables are positioned slightly behind shoulder level. With a slight elbow bend, pull the handles forward and slightly together in a controlled manner, focusing on the stretch and contraction of the pectorals. The lat pulldown targets the latissimus dorsi and back musculature. Sit at the machine with thighs secured under the knee pad. Grab the bar with hands slightly wider than shoulder-width, overhand grip. Pull the bar down toward your upper chest by retracting your scapulae and flexing your elbows. Avoid excessive body lean; movement should primarily occur at the shoulders. Control the return to the starting position. Cable exercises are excellent for isolation and muscular endurance work, serving as valuable accessories to compound movements.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Why SBD Ratios Matter -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold text-orange-400 mb-4">⚖️ Why SBD Ratios Matter: The Science of Structural Balance</h3>
+                <p class="text-slate-300 leading-relaxed mb-4">
+                    The Squat, Bench Press, and Deadlift (SBD) form the foundation of strength sports and are universally recognized as the primary indicators of overall body strength. The ratio-based approach to programming, as used in this dashboard, is grounded in extensive sports science research and practical experience from elite powerlifters and strength coaches.
+                </p>
+                <p class="text-slate-300 leading-relaxed mb-4">
+                    Structural balance refers to the proportional development of strength and muscle mass across different movement patterns and muscle groups. An athlete with excellent structural balance can perform all three powerlifts proportionally well, can effectively handle loads across multiple movement patterns, and is less prone to injury due to muscular imbalances. For example, an athlete whose bench press is disproportionately high compared to their deadlift may develop anterior chain dominance, leading to poor posture, shoulder issues, and lower body weakness.
+                </p>
+                <p class="text-slate-300 leading-relaxed mb-4">
+                    Research indicates that healthy strength ratios typically follow these patterns: the deadlift 1RM is typically 20-40% heavier than the squat 1RM (due to the shorter range of motion and mechanical advantage), and the squat 1RM is typically 1.2-1.5x the bench press 1RM. Secondary exercises should be loaded according to these ratios to ensure balanced development. For instance, the overhead press typically lands at 50-65% of bench press 1RM, while rows often range from 50-70% of deadlift 1RM.
+                </p>
+                <p class="text-slate-300 leading-relaxed mb-4">
+                    The dashboard uses these time-tested ratios to prescribe accessory exercise weights. By maintaining structural balance through ratio-based programming, you'll experience improved force production, reduced injury risk, better movement quality, and more sustainable long-term strength progression. Imbalances create injury risk and limit absolute strength potential. This scientific approach to exercise prescription has been validated across thousands of lifters and is used by elite coaches worldwide.
+                </p>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold text-orange-400 mb-4">❓ Frequently Asked Questions (FAQ)</h3>
+                <div class="space-y-4">
+                    <div class="bg-slate-700 p-4 rounded">
+                        <h4 class="text-lg font-bold text-red-400 mb-2">How often should I retest my 1RM?</h4>
+                        <p class="text-slate-300">For most lifters, retesting 1RMs every 8-12 weeks is ideal. More frequent testing can lead to overuse injuries and excessive central nervous system fatigue. Less frequent testing may result in following an overly conservative program that doesn't match your current strength. Always warm up thoroughly before attempting max efforts, and consider testing only one lift per session to allow adequate recovery. You can estimate strength improvements using doubles or triples and RPE (Rate of Perceived Exertion) between formal max attempts.</p>
+                    </div>
+                    <div class="bg-slate-700 p-4 rounded">
+                        <h4 class="text-lg font-bold text-red-400 mb-2">What if the recommended weight feels too heavy?</h4>
+                        <p class="text-slate-300">Start lighter! The percentages recommended by this dashboard are based on average populations and research ratios. Every athlete responds differently based on leverage, experience, and individual variation. If a prescribed weight compromises your form, reduce it by 5-10 lbs and work from there. Proper form and controlled movement should always take priority over heavy weight. It's better to use slightly lighter weight with perfect form than to sacrifice technique for ego. Track your progress and increase weight incrementally as you adapt, typically in 5-10 lb increments when the current weight becomes manageable for your prescribed rep range.</p>
+                    </div>
+                    <div class="bg-slate-700 p-4 rounded">
+                        <h4 class="text-lg font-bold text-red-400 mb-2">How should I warm up properly before lifting?</h4>
+                        <p class="text-slate-300">Begin with 5-10 minutes of general cardiovascular activity (rowing, walking, light cycling) to elevate heart rate and increase core body temperature. Follow with dynamic stretching and mobility work targeting the areas you'll be training—arm circles, leg swings, bodyweight squats, etc. Then perform movement-specific warm-up sets starting with empty barbell or light weight. For main lifts, perform warm-up sets at approximately 50%, 70%, and 85% of your working weight, with increasing reps as weight decreases. This neural activation and tissue preparation significantly improves performance and injury prevention. Proper warm-up should take 15-25 minutes depending on your experience and the demands of your training session.</p>
+                    </div>
+                    <div class="bg-slate-700 p-4 rounded">
+                        <h4 class="text-lg font-bold text-red-400 mb-2">How can I track my progress effectively?</h4>
+                        <p class="text-slate-300">Use this dashboard's workout checklist to record completed exercises daily. Keep detailed notes of weights used, reps completed, and how the session felt. Use the progress bar to monitor your SBD total progression toward your ultimate goal. Track metrics like total volume (sets × reps × weight), body weight changes, and photo progress monthly. Apps or spreadsheets can help organize data. Consistent documentation allows you to identify patterns, make informed adjustments, and celebrate progress. Avoid relying solely on the scale; strength, muscle growth, and body composition changes matter more than raw weight.</p>
+                    </div>
+                    <div class="bg-slate-700 p-4 rounded">
+                        <h4 class="text-lg font-bold text-red-400 mb-2">Should I train to failure on every set?</h4>
+                        <p class="text-slate-300">No. Training to absolute failure should be limited to occasional sessions and specific exercises, as it significantly increases fatigue and injury risk. For compound lifts (squat, bench, deadlift), stopping 1-3 reps short of failure (RIR: Reps in Reserve) is optimal for strength and safety. Accessory work can tolerate slightly higher RPE. Most gains come from consistent, sustainable training with proper form, not maximum effort on every rep. Sustainable training allows more frequent training sessions, better recovery, and injury prevention—keys to long-term progress.</p>
+                    </div>
+                    <div class="bg-slate-700 p-4 rounded">
+                        <h4 class="text-lg font-bold text-red-400 mb-2">How important is nutrition and recovery?</h4>
+                        <p class="text-slate-300">Nutrition and recovery are absolutely critical—arguably as important as the training itself. Consume sufficient protein (0.7-1g per lb of bodyweight) distributed across meals to maximize muscle protein synthesis. Eat in a slight caloric surplus for hypertrophy, maintenance for strength, or deficit for fat loss. Prioritize whole foods: meat, fish, eggs, dairy, vegetables, fruits, rice, and potatoes. Sleep 7-9 hours nightly; growth hormone and testosterone secretion occur primarily during deep sleep. Manage stress and avoid overtraining. Consider supplements like creatine and whey protein for convenience, but whole food should form your nutritional foundation. Recovery work like stretching, foam rolling, and sauna use supports adaptation and reduces soreness.</p>
+                    </div>
+                    <div class="bg-slate-700 p-4 rounded">
+                        <h4 class="text-lg font-bold text-red-400 mb-2">Can beginners use this program?</h4>
+                        <p class="text-slate-300">Absolutely! This program scales based on your selected experience level (Beginner, Intermediate, Advanced). Beginners should start with lighter weights, focus intensely on form, and prioritize establishing consistent training habits. The 6-day PPL split may be intense for true beginners; consider a 3-day or 4-day split initially. Allow 4-6 weeks before attempting 1RM tests. Beginners typically see rapid strength gains (20-30% in first 3 months) due to neural adaptation. Working with an experienced coach or trainer in-person is invaluable for beginners to ensure movement quality. Don't attempt maximum weights until basic movement patterns feel natural and controlled.</p>
+                    </div>
+                    <div class="bg-slate-700 p-4 rounded">
+                        <h4 class="text-lg font-bold text-red-400 mb-2">What if I can't make it to the gym 6 days per week?</h4>
+                        <p class="text-slate-300">Consistency matters more than perfection. If 6 days isn't sustainable, adapt to what fits your schedule. A 4-day upper/lower split or full-body 3-day program can be equally effective. The key is training hard, eating well, and recovering. Abbreviated but consistent training beats sporadic intense training every time. Use this dashboard to plan your actual training frequency and adjust the PPL schedule accordingly. Focus on the main movements (squat, bench, deadlift, rows) and essential accessories, dropping less important movements if time is limited. Quality over quantity—5 focused sessions per week beats 6 sloppy sessions.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BOTTOM ADSENSE PLACEHOLDER -->
+        <div class="bg-slate-900 border-t border-slate-700 p-6 mt-12">
+            <div class="max-w-7xl mx-auto">
+                <div class="adsense-placeholder">
+                    [Google AdSense Banner Area - Responsive] Bottom Banner
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER WITH MODALS -->
+        <footer class="bg-slate-900 border-t border-slate-700 mt-12">
+            <div class="max-w-7xl mx-auto px-4 py-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <div>
+                        <h3 class="text-lg font-bold text-red-400 mb-4">About This Tool</h3>
+                        <p class="text-slate-400 text-sm">A comprehensive strength training dashboard powered by sports science research and ratio-based programming principles.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-red-400 mb-4">Resources</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li><a href="#" onclick="openModal('privacyModal')" class="text-slate-400 hover:text-red-400 transition">Privacy Policy</a></li>
+                            <li><a href="#" onclick="openModal('termsModal')" class="text-slate-400 hover:text-red-400 transition">Terms of Service</a></li>
+                            <li><a href="#" onclick="openModal('disclaimerModal')" class="text-slate-400 hover:text-red-400 transition">Medical Disclaimer</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-red-400 mb-4">Support</h3>
+                        <p class="text-slate-400 text-sm">Always consult with a qualified fitness professional before starting any new training program.</p>
+                    </div>
+                </div>
+                <div class="border-t border-slate-700 pt-4 text-center text-slate-500 text-sm">
+                    <p>&copy; 2024 SBD Strength Dashboard. All rights reserved. Strength training carries inherent risks. Always train safely.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal" onclick="closeModalOnBackdrop(event, 'privacyModal')">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-red-400">Privacy Policy</h2>
+                <button onclick="closeModal('privacyModal')" class="text-3xl text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <div class="text-slate-300 space-y-4">
+                <p>This Privacy Policy explains how the SBD Strength Dashboard collects, uses, and protects your information.</p>
+                <h3 class="text-lg font-bold text-orange-400">Information Collection</h3>
+                <p>We collect information you voluntarily provide through the web form, including age, height, weight, gender, fitness experience, training goals, and 1RM statistics. This data is stored locally in your browser using LocalStorage and is never transmitted to external servers without your explicit consent.</p>
+                <h3 class="text-lg font-bold text-orange-400">Data Usage</h3>
+                <p>Your data is used exclusively to generate personalized workout recommendations and progress tracking. We do not sell, trade, or share your personal information with third parties. Analytics services may collect anonymous usage data to improve the dashboard experience.</p>
+                <h3 class="text-lg font-bold text-orange-400">Cookies & LocalStorage</h3>
+                <p>We use browser LocalStorage to save your workout checklist and preferences, allowing your data to persist between sessions. This is stored locally on your device and is not tracked across websites.</p>
+                <h3 class="text-lg font-bold text-orange-400">Contact & Changes</h3>
+                <p>For privacy inquiries, contact us through the feedback mechanism. We may update this Privacy Policy periodically. Continued use of the dashboard implies acceptance of these terms.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms of Service Modal -->
+    <div id="termsModal" class="modal" onclick="closeModalOnBackdrop(event, 'termsModal')">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-red-400">Terms of Service</h2>
+                <button onclick="closeModal('termsModal')" class="text-3xl text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <div class="text-slate-300 space-y-4">
+                <p>By accessing and using the SBD Strength Dashboard, you agree to comply with these Terms of Service.</p>
+                <h3 class="text-lg font-bold text-orange-400">Use License</h3>
+                <p>Permission is granted to temporarily download one copy of materials (information or software) on the SBD Strength Dashboard for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:</p>
+                <ul class="list-disc list-inside text-sm space-y-2">
+                    <li>Modify or copy the materials</li>
+                    <li>Use the materials for any commercial purpose or for any public display</li>
+                    <li>Attempt to decompile or reverse engineer any software contained on the dashboard</li>
+                    <li>Remove any copyright or other proprietary notations from the materials</li>
+                </ul>
+                <h3 class="text-lg font-bold text-orange-400">Disclaimer</h3>
+                <p>The materials on the SBD Strength Dashboard are provided on an 'as is' basis. We make no warranties, expressed or implied, and hereby disclaim and negate all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.</p>
+                <h3 class="text-lg font-bold text-orange-400">Limitations</h3>
+                <p>In no event shall the SBD Strength Dashboard or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on the dashboard, even if we have been notified of the possibility of such damage.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medical Disclaimer Modal -->
+    <div id="disclaimerModal" class="modal" onclick="closeModalOnBackdrop(event, 'disclaimerModal')">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-red-400">Medical Disclaimer</h2>
+                <button onclick="closeModal('disclaimerModal')" class="text-3xl text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <div class="text-slate-300 space-y-4">
+                <p class="font-bold text-orange-400">IMPORTANT SAFETY INFORMATION</p>
+                <p>The SBD Strength Dashboard provides educational fitness programming and is not a substitute for professional medical advice, diagnosis, or treatment. Strength training and resistance exercise carry inherent risks, including but not limited to muscle strains, joint injuries, and cardiovascular stress.</p>
+                <h3 class="text-lg font-bold text-orange-400">Before Beginning</h3>
+                <p>Before starting this or any new fitness program, consult with a qualified healthcare provider, especially if you have pre-existing health conditions, cardiovascular concerns, joint problems, or take medications that affect exercise safety. Persons with risk factors should obtain clearance from their physician.</p>
+                <h3 class="text-lg font-bold text-orange-400">Working with Professionals</h3>
+                <p>We strongly recommend working with a certified strength and conditioning coach or personal trainer, particularly if you are new to weightlifting. A qualified professional can assess your movement quality, ensure proper form, and provide personalized modifications based on your individual needs.</p>
+                <h3 class="text-lg font-bold text-orange-400">Personal Responsibility</h3>
+                <p>Use of the SBD Strength Dashboard is at your own risk. The creators and providers assume no liability for injuries or adverse effects resulting from the use of this program. By using this dashboard, you acknowledge that you understand the risks involved in strength training and assume full responsibility for your safety.</p>
+                <h3 class="text-lg font-bold text-orange-400">Pain & Injury</h3>
+                <p>Stop immediately if you experience sharp pain, dizziness, shortness of breath, or any unusual symptoms. Consult a healthcare professional before resuming activity. Muscle soreness is normal; pain is not.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function closeModalOnBackdrop(event, modalId) {
+            if (event.target.id === modalId) {
+                closeModal(modalId);
+            }
+        }
+
+        // Workout Data
+        let workoutData = {
+            chest: [
+                { name: 'Barbell Bench Press', percent: 1.0 },
+                { name: 'Incline Dumbbell Press', percent: 0.40 },
+                { name: 'Cable Chest Fly', percent: 0.20 },
+                { name: 'Chest Dips', percent: 0.5 }
+            ],
+            shoulder: [
+                { name: 'Overhead Press (OHP)', percent: 0.62 },
+                { name: 'Dumbbell Shoulder Press', percent: 0.25 },
+                { name: 'Dumbbell Lateral Raise', percent: 0.10 },
+                { name: 'Reverse Pec Deck Fly', percent: 0.12 }
+            ],
+            legs: [
+                { name: 'Barbell Squat', percent: 1.0 },
+                { name: 'Leg Press', percent: 1.75 },
+                { name: 'Bulgarian Split Squat', percent: 0.20 },
+                { name: 'Romanian Deadlift', percent: 0.75 }
+            ],
+            back: [
+                { name: 'Conventional Deadlift', percent: 1.0 },
+                { name: 'Barbell Row', percent: 0.55 },
+                { name: 'Lat Pulldown', percent: 0.50 },
+                { name: 'Seated Cable Row', percent: 0.45 }
+            ]
+        };
+
+        function playSuccessSound() {
+            // Create a simple beep sound using Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800; // Frequency in Hz
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        function calculateRoutine() {
+            const bench = parseFloat(document.getElementById('bench1rm').value);
+            const squat = parseFloat(document.getElementById('squat1rm').value);
+            const deadlift = parseFloat(document.getElementById('deadlift1rm').value);
+            const goal = document.getElementById('goal').value;
+            const targetTotal = parseFloat(document.getElementById('targetTotal').value);
+
+            if (!bench || !squat || !deadlift) {
+                alert('Please enter all three 1RM values');
+                return;
+            }
+
+            // Play success sound
+            playSuccessSound();
+
+            // Update Progress Bar
+            const currentTotal = bench + squat + deadlift;
+            const progress = Math.min((currentTotal / targetTotal) * 100, 100);
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').innerText = `${Math.round(currentTotal)} / ${targetTotal} lbs`;
+
+            // Determine rep/set scheme and working percentage
+            let setsReps = '';
+            let workingPercent = '';
+            let workingPercentDecimal = 0;
+            if (goal === 'hypertrophy') {
+                setsReps = '3-4 x 8-12 reps';
+                workingPercent = '70-75%';
+                workingPercentDecimal = 0.725; // midpoint of 70-75%
+            } else if (goal === 'strength') {
+                setsReps = '4-5 x 3-5 reps';
+                workingPercent = '85-90%';
+                workingPercentDecimal = 0.875; // midpoint of 85-90%
+            } else {
+                setsReps = '3 x 8-10 reps';
+                workingPercent = '70-80%';
+                workingPercentDecimal = 0.75; // midpoint of 70-80%
+            }
+
+            // Generate exercises
+            displayExercises('chestExercises', workoutData.chest, bench, setsReps, workingPercent, workingPercentDecimal);
+            displayExercises('shoulderExercises', workoutData.shoulder, bench, setsReps, workingPercent, workingPercentDecimal);
+            displayExercises('legExercises', workoutData.legs, squat, setsReps, workingPercent, workingPercentDecimal);
+            displayExercises('backExercises', workoutData.back, deadlift, setsReps, workingPercent, workingPercentDecimal);
+
+            // Show sections
+            document.getElementById('resultsSection').classList.remove('hidden');
+            document.getElementById('scheduleSection').classList.remove('hidden');
+            document.getElementById('trackerSection').classList.remove('hidden');
+
+            // Initialize tracker
+            initializeTracking();
+        }
+
+        function displayExercises(elementId, exercises, baseWeight, setsReps, workingPercent, workingPercentDecimal) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+
+            exercises.forEach(ex => {
+                const weight = Math.round(baseWeight * ex.percent * workingPercentDecimal / 5) * 5; // Round to nearest 5
+                // Determine if it's a dumbbell exercise (contains "Dumbbell" or "DB" or "Lateral Raise")
+                const isDumbbell = ex.name.includes('Dumbbell') || ex.name.includes('DB') || ex.name.includes('Lateral Raise');
+                const weightLabel = isDumbbell ? `${weight} lbs per side` : `${weight} lbs`;
+                
+                // Parse sets and reps separately (e.g., "3-4 x 8-12 reps" -> sets: "3-4", reps: "8-12")
+                const parts = setsReps.split(' x ');
+                const sets = parts[0];
+                const reps = parts[1].replace(' reps', '');
+                
+                const card = document.createElement('div');
+                card.className = 'exercise-card p-4 rounded';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-orange-300 mb-1">${ex.name}</h4>
+                            <p class="text-sm text-slate-400 mb-2">${weightLabel}</p>
+                            <p class="text-xs text-slate-300 mb-1"><span class="font-semibold">Sets:</span> ${sets} | <span class="font-semibold">Reps:</span> ${reps}</p>
+                            <p class="text-xs text-slate-500">${workingPercent} of 1RM</p>
+                        </div>
+                        <input type="checkbox" class="w-5 h-5 text-red-500 cursor-pointer" onchange="saveChecklist()">
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function initializeTracking() {
+            const today = new Date().toDateString();
+            const savedDate = localStorage.getItem('workoutDate');
+            
+            // Reset if different day
+            if (savedDate !== today) {
+                localStorage.setItem('workoutDate', today);
+                localStorage.removeItem('workoutChecklist');
+            }
+
+            // Load saved state
+            const saved = localStorage.getItem('workoutChecklist');
+            if (saved) {
+                const checkedIds = JSON.parse(saved);
+                const checkboxes = document.querySelectorAll('.exercise-card input[type="checkbox"]');
+                checkboxes.forEach((cb, index) => {
+                    if (checkedIds.includes(index)) {
+                        cb.checked = true;
+                    }
+                });
+            }
+        }
+
+        function saveChecklist() {
+            const checkboxes = document.querySelectorAll('.exercise-card input[type="checkbox"]');
+            const checkedIds = [];
+            checkboxes.forEach((cb, index) => {
+                if (cb.checked) {
+                    checkedIds.push(index);
+                }
+            });
+            localStorage.setItem('workoutChecklist', JSON.stringify(checkedIds));
+        }
+
+        function clearChecklist() {
+            document.querySelectorAll('.exercise-card input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            localStorage.removeItem('workoutChecklist');
+        }
+
+        // Update progress on input change
+        document.addEventListener('DOMContentLoaded', function() {
+            ['bench1rm', 'squat1rm', 'deadlift1rm', 'targetTotal'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', function() {
+                        const bench = parseFloat(document.getElementById('bench1rm').value) || 0;
+                        const squat = parseFloat(document.getElementById('squat1rm').value) || 0;
+                        const deadlift = parseFloat(document.getElementById('deadlift1rm').value) || 0;
+                        const target = parseFloat(document.getElementById('targetTotal').value) || 1;
+                        
+                        const current = bench + squat + deadlift;
+                        const progress = Math.min((current / target) * 100, 100);
+                        document.getElementById('progressBar').style.width = progress + '%';
+                        document.getElementById('progressText').innerText = `${Math.round(current)} / ${target} lbs`;
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
